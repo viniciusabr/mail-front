@@ -2,17 +2,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 100px;
+  padding-top: 10px;
 
   & form{
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 25px;
   padding: 30px;
   border-radius: 10px;
   background-color: #2E2D4E;
-  max-width: 50%;
-  width: 400px;
+  max-width: 100%;
+  width: 600px;
   margin-bottom: 20px;
   text-align: center;
 
@@ -20,7 +20,6 @@
     border-radius: 30px;
     background-color: #8B8AE1;
     height: 40px;
-    border: nome;
     font-weight: bold;
     cursor: pointer;
   }
