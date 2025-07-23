@@ -1,126 +1,160 @@
-import React, { useState, useRef } from 'react';
-import EmailTagInput from './EmailTagInput'; // Importe o componente de tags de e-mail
+import React, { useState } from 'react';
 
+// Função auxiliar para validar e-mail simples
+const isValidEmail = (email) => {
+  return /\S+@\S+\.\S+/.test(email);
+};
 
 function EmailForm() {
-    
-    const [showCards, setShowCards] = useState(false); // Controla a visibilidade dos cards
-    
-    const toggleCardsVisibility = () => {
-    setShowCards(prevShowCards => !prevShowCards);
-  };
-
-  const [nomes, setNome] = useState([]);
-  const [inputNome, setInputNome] = useState('')
-  const [numeroCaso, setNumeroCaso] = useState([]);
-  // Não precisamos de um estado para os e-mails aqui, pois EmailTagInput gerencia isso
-  // mas usaremos uma ref para acessá-los
-
-  const emailTagInputRef = useRef(null); // Ref para o componente EmailTagInput
+  const [nome, setNome] = useState('');
+  const [numeroCaso, setNumeroCaso] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [pendingEmailEntries, setPendingEmailEntries] = useState([]);
+  const [isSending, setIsSending] = useState(false);
+  const [emailInputError, setEmailInputError] = useState(false);
 
   const handleNomeChange = (e) => {
-    setInputNome(e.target.value);
-
+    setNome(e.target.value);
   };
 
   const handleNumeroCasoChange = (e) => {
-    e.preventDefault()
     setNumeroCaso(e.target.value);
   };
-  const addNome = (nome) => {
-   const trimNome =  nome.trim()
-    if (trimNome && !nomes.includes(trimNome)){
-        setNome([...nomes, trimNome])
-        
 
-    } 
-        
-
- }
-
-  const handleInputBlur = () => {
-    if (inputNome) {
-      addNome(inputNome);
-    }
+  const handleEmailInputChange = (e) => {
+    setEmailInput(e.target.value);
+    setEmailInputError(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Impede o comportamento padrão de recarregar a página ao enviar o formulário
-
-    addNome(inputNome)
-
-    // Coleta os e-mails do componente filho usando a ref
-    const emailsColetados = emailTagInputRef.current ? emailTagInputRef.current.getEmails() : [];
-
-    // ** Validação Básica (adicione validação mais robusta se necessário) **
-    if (nomes.length === 0) {
+  // Função para adicionar o conjunto atual de dados à lista de pendentes
+  const handleAddEntryToList = () => {
+    // 1. Validação dos campos antes de adicionar à lista
+    if (!nome.trim()) {
       alert('Por favor, preencha o campo Nome.');
       return;
     }
-    if (!numeroCaso) {
+    if (!numeroCaso.trim()) {
       alert('Por favor, preencha o campo Número do caso.');
       return;
     }
-    if (emailsColetados.length === 0) {
-      alert('Por favor, adicione pelo menos um e-mail.');
+    if (!emailInput.trim()) {
+      setEmailInputError(true);
+      alert('Por favor, preencha o campo E-mail.');
+      return;
+    }
+    if (!isValidEmail(emailInput.trim())) {
+      setEmailInputError(true);
+      alert('Por favor, insira um formato de e-mail válido.');
       return;
     }
 
-    const dadosParaEnvio = {
-      nome: nomes,
-      numeroCaso: numeroCaso,
-      destinatarios: emailsColetados, // O array de e-mails
-    
+    // Verifica se o e-mail já existe na lista de pendentes para evitar duplicatas
+    const isDuplicate = pendingEmailEntries.some(entry => 
+      entry.destinatario === emailInput.trim() && 
+      entry.nome === nome.trim() && 
+      entry.numeroCaso === numeroCaso.trim()
+    );
+
+    if (isDuplicate) {
+      alert('Esta entrada (Nome, Número do Caso, E-mail) já foi adicionada à lista.');
+      return;
+    }
+
+    // Se todas as validações passarem, cria a nova entrada
+    const newEntry = {
+      id: Date.now(), // Um ID único simples para a chave da lista no front-end
+      nome: nome.trim(),
+      numeroCaso: numeroCaso.trim(),
+      destinatario: emailInput.trim(),
     };
 
-    console.log('Dados prontos para envio:', dadosParaEnvio);
+    setPendingEmailEntries(prevEntries => [...prevEntries, newEntry]);
 
-    // ** DISPARO DA API DE E-MAIL **
-    // Substitua 'SUA_URL_DA_API_DE_ENVIO_DE_EMAIL' pela URL real da sua API
-    // Certifique-se de que sua API está configurada para receber requisições POST com JSON
+    // Limpa o formulário após adicionar à lista
+    setNome('');
+    setNumeroCaso('');
+    setEmailInput('');
+    setEmailInputError(false);
+    alert('Informações adicionadas à lista de envios!');
+  };
+
+  // Função para remover um item da lista de pendentes
+  const handleRemoveEntry = (idToRemove) => {
+    setPendingEmailEntries(prevEntries => prevEntries.filter(entry => entry.id !== idToRemove));
+  };
+
+  // FUNÇÃO AJUSTADA: Envia todos os e-mails na lista de pendentes em uma única requisição
+  const handleSendAllEmails = async () => {
+    if (pendingEmailEntries.length === 0) {
+      alert('Não há e-mails na lista para enviar.');
+      return;
+    }
+
+    setIsSending(true); // Ativa o estado de carregamento
+
+    // Mapeia os dados para o formato desejado pelo backend
+    const dataToSend = pendingEmailEntries.map(entry => ({
+      name: entry.nome,
+      email: entry.destinatario,
+      caso: entry.numeroCaso,
+      // Você pode adicionar mais campos aqui se sua API precisar,
+      // como assunto ou corpo da mensagem, que seriam os mesmos para todos
+      // ou personalizados se a API os processar.
+    }));
+
+    // Cria o payload final com a chave "data"
+    const payload = {
+      data: dataToSend
+    };
+
+    console.log('Payload pronto para envio em lote:', payload);
+
     try {
-      const response = await fetch('http://localhost:3000/customers', {
+      // Substitua 'SUA_URL_DA_API_DE_ENVIO_DE_EMAIL_EM_LOTE' pela URL real da sua API
+      // Sua API agora deve esperar um array de objetos sob a chave 'data'
+      const response = await fetch('SUA_URL_DA_API_DE_ENVIO_DE_EMAIL_EM_LOTE', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           // Se sua API exigir autenticação (ex: token de API), adicione aqui:
           // 'Authorization': 'Bearer SEU_TOKEN_AQUI' 
         },
-        body: JSON.stringify(dadosParaEnvio),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        alert('E-mail enviado com sucesso!');
-        // Limpar o formulário após o envio bem-sucedido
-        setNome('');
-        setNumeroCaso('');
-        if (emailTagInputRef.current) {
-          emailTagInputRef.current.clearEmails(); // Limpa os emails no componente filho
-        }
+        alert(`Todos os ${pendingEmailEntries.length} e-mails foram enviados e registrados com sucesso!`);
+        // Opcional: Se sua API de envio já registra no DB, não precisa de outra chamada
+        // Se precisar de uma API de registro separada, chame-a aqui, passando o 'payload'
+        // await fetch('SUA_URL_DA_API_DE_REGISTRO_NO_DB', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(payload),
+        // });
       } else {
-        const errorData = await response.json(); // Tenta ler a resposta de erro
-        alert(`Erro ao enviar e-mail: ${errorData.message || response.statusText}`);
+        const errorData = await response.json();
+        alert(`Erro ao enviar e-mails: ${errorData.message || response.statusText}`);
         console.error('Erro na resposta da API:', errorData);
       }
     } catch (error) {
       console.error('Erro ao conectar com a API de e-mail:', error);
-      alert('Ocorreu um erro ao enviar o e-mail. Verifique a conexão ou tente novamente mais tarde.');
+      alert('Ocorreu um erro ao enviar os e-mails. Verifique a conexão ou tente novamente mais tarde.');
+    } finally {
+      setIsSending(false); // Desativa o estado de carregamento
+      setPendingEmailEntries([]); // Limpa a lista de pendentes após a tentativa de envio
     }
-    
   };
-  
 
   return (
-    <div style={formStyles.container} >
-      <h1 >E-mail CSAT</h1>
-      <form onSubmit={handleSubmit}>
+    <div style={formStyles.container}>
+      <h1 style={formStyles.title}>E-mail CSAT</h1>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div style={formStyles.inputGroup}>
           <input
             type="text"
             placeholder="Nome"
-            value={inputNome}
+            value={nome}
             onChange={handleNomeChange}
-            onBlur={handleInputBlur}
             style={formStyles.input}
           />
         </div>
@@ -134,48 +168,58 @@ function EmailForm() {
           />
         </div>
         
-        {/* Componente de tags de e-mail */}
-        <EmailTagInput ref={emailTagInputRef} />
-
-        <button type="submit" style={formStyles.sendButton}>
-          Enviar
-        </button>
-        <div
-        onClick={toggleCardsVisibility}
-        className="btnRegistro"
-      >
-        {showCards ? 'Ocultar Registros' : 'Exibir Registros'}
-      </div>
-      {showCards && (
-        
-        <div className="cards-container">
-          {nomes.length > 0 ? (
-            nomes.map(user => (
-              <div key={user.id} className='card'>
-                <p><span>ID: </span>{user.id}</p>
-                <p><span>Nome:</span> {user.name}</p>
-                <p><span>Número do Caso:</span> {user.caso}</p>
-                <p><span>E-mail:</span> {user.email}</p>
-                <p><span>Data:</span> {user.data}</p>
-              </div>
-            ))
-          ) : (
-            <p className='semRegistro'>Nenhum registro encontrado!</p>
+        <div style={formStyles.inputGroup}>
+          <input
+            type="email"
+            placeholder="E-mail"
+            value={emailInput}
+            onChange={handleEmailInputChange}
+            style={{
+              ...formStyles.input,
+              borderColor: emailInputError ? 'red' : formStyles.input.borderColor,
+            }}
+          />
+          {emailInputError && (
+            <p style={formStyles.errorMessage}>Formato de e-mail inválido.</p>
           )}
-      </div>
-      
-        
-      )}
+        </div>
+
+        <button type="button" onClick={handleAddEntryToList} style={formStyles.addButton}>
+          Adicionar à Lista
+        </button>
       </form>
 
-    
+      {pendingEmailEntries.length > 0 && (
+        <div style={formStyles.pendingListContainer}>
+          <h3 style={formStyles.pendingListTitle}>E-mails a Enviar ({pendingEmailEntries.length})</h3>
+          <ul style={formStyles.pendingList}>
+            {pendingEmailEntries.map(entry => (
+              <li key={entry.id} style={formStyles.pendingListItem}>
+                <span>{entry.nome} (Caso: {entry.numeroCaso}) para: {entry.destinatario}</span>
+                <button onClick={() => handleRemoveEntry(entry.id)} style={formStyles.removePendingButton}>
+                  X
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={handleSendAllEmails}
+            style={formStyles.sendAllButton}
+            disabled={isSending}
+          >
+            {isSending ? 'Enviando...' : 'Enviar Todos os E-mails'}
+          </button>
+        </div>
+      )}
 
-        
+      <button style={formStyles.showRecordsButton}>
+        Exibir Registros
+      </button>
     </div>
   );
 }
 
-// Estilos para o formulário principal, baseados na sua imagem
+// Estilos (mantidos os mesmos do exemplo anterior)
 const formStyles = {
   container: {
     fontFamily: 'Arial, sans-serif',
@@ -184,12 +228,12 @@ const formStyles = {
     margin: '50px auto',
     padding: '30px',
     borderRadius: '10px',
-    backgroundColor: '#2E2D4E', // Cor de fundo do card na imagem
+    backgroundColor: '#2E2D4E',
     boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '20px', // Espaço entre os elementos
+    gap: '20px',
   },
   title: {
     color: '#fff',
@@ -199,39 +243,110 @@ const formStyles = {
   },
   inputGroup: {
     width: '100%',
-    marginBottom: '10px', // Espaço entre os inputs
+    marginBottom: '10px',
   },
   input: {
-    width: 'calc(100% - 20px)', // Largura total menos padding
+    width: 'calc(100% - 20px)',
     padding: '12px 10px',
-    border: '1px solid #7a7096', // Borda mais escura para combinar
+    border: '1px solid #7a7096',
     borderRadius: '4px',
-    backgroundColor: '#3a3450', // Fundo dos inputs
+    backgroundColor: '#3a3450',
     color: '#fff',
     fontSize: '16px',
     outline: 'none',
   },
-  sendButton: {
+  addButton: {
+    width: '100%',
+    padding: '12px 20px',
+    backgroundColor: '#6c757d',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    marginTop: '10px',
+    transition: 'background-color 0.3s ease',
+  },
+  pendingListContainer: {
+    width: '100%',
+    backgroundColor: '#3a3450',
+    borderRadius: '8px',
+    padding: '15px',
+    marginTop: '20px',
+    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)',
+  },
+  pendingListTitle: {
+    color: '#fff',
+    fontSize: '18px',
+    marginBottom: '10px',
+    textAlign: 'center',
+  },
+  pendingList: {
+    listStyle: 'none',
+    padding: '0',
+    margin: '0',
+    maxHeight: '200px',
+    overflowY: 'auto',
+    borderBottom: '1px solid #5a5076',
+    paddingBottom: '10px',
+    marginBottom: '10px',
+  },
+  pendingListItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#5a5076',
+    borderRadius: '4px',
+    padding: '8px 12px',
+    marginBottom: '8px',
+    color: '#fff',
+    fontSize: '14px',
+  },
+  removePendingButton: {
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    marginLeft: '10px',
+  },
+  sendAllButton: {
     width: '100%',
     padding: '15px 20px',
-    backgroundColor: '#a397ed', // Cor do botão "Enviar"
+    backgroundColor: '#a397ed',
     color: '#fff',
     border: 'none',
     borderRadius: '4px',
     fontSize: '18px',
     fontWeight: 'bold',
     cursor: 'pointer',
-    marginTop: '20px', // Espaço acima do botão
+    marginTop: '10px',
     transition: 'background-color 0.3s ease',
   },
   showRecordsButton: {
     background: 'none',
     border: 'none',
-    color: '#a397ed', // Cor do texto "Exibir Registros"
+    color: '#a397ed',
     fontSize: '16px',
     cursor: 'pointer',
     marginTop: '10px',
-    textDecoration: 'none', // Remove sublinhado se houver
+    textDecoration: 'none',
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: '12px',
+    marginTop: '5px',
+    marginBottom: '0',
+    textAlign: 'left',
+    width: '100%',
   },
 };
 
