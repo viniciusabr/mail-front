@@ -24,7 +24,8 @@ export const login = async (payload) => {
 
 export const register = async (payload) => {
   try {
-    return await axios.post('http://localhost:3000/api/auth/register', payload);
+    const response = await axios.post('http://localhost:3000/api/auth/register', payload);
+    return response.data;
   } catch (error) {
     const message =
       error.response?.data?.message || error.message || 'Erro ao enviar';

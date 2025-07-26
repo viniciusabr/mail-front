@@ -45,23 +45,23 @@ export default function useEmailForm() {
       setEmailInputError(true);
       setValidEmail(true);
       toast.error('Digite um e-mail válido');
-      return
+      return false
     }
 
 
     if (!/^\d+$/.test(numeroCaso) && numeroCaso.length !== 0) {
       setCasoError(true);
       toast.error("O número do caso deve conter apenas números.");
-      return;
+      return false;
     }
 
     if (numeroCaso.length !== 8 && numeroCaso.length !== 0) {
       setCasoError(true);
       toast.error("O número do caso deve ter exatamente 8 dígitos.");
-      return;
+      return false;
     }
 
-    if (hasError) return
+    if (hasError) return false
 
 
     const isDuplicate = pendingEmailEntries.some(entry =>
@@ -88,6 +88,8 @@ export default function useEmailForm() {
     setEmailInput('');
     setEmailInputError(false);
     toast.success('Informações adicionadas à lista de envios!');
+
+    return true
   };
 
   const handleRemoveEntry = (idToRemove) => {

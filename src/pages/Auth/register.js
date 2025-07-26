@@ -77,12 +77,11 @@ export default function useRegister() {
         password: passwordInput,
       });
 
-      if (result && result.token) {
-        navigate("/send-emails");
-        return result.token;
-      } else {
-        throw new Error("Token não retornado pelo servidor.");
-      }
+      console.log("Resultado do register:", result);
+      console.log("Token retornado:", result?.token);
+
+      navigate("/send-emails");
+
     } catch (error) {
       console.error("Erro ao registrar:", error.response?.data || error.message);
       setFormError(error.message)
@@ -102,6 +101,7 @@ export default function useRegister() {
     handleEmailChange,
     handlePasswordChange,
     handleSubmit,
-    formError
+    formError,
+    setFormError
   };
 }

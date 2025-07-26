@@ -1,38 +1,71 @@
+
+// import React from 'react';
+// import { motion, AnimatePresence } from 'framer-motion';
+
+// function PendingEmailList({ entries, onRemove }) {
+//   return (
+//     <ul className="space-y-4 w-full max-h-[240px] overflow-y-auto pr-1">
+//       <AnimatePresence>
+//         {entries.map(entry => (
+//           <motion.li
+//             key={entry.id}
+//             initial={{ opacity: 0, y: 10 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             exit={{ opacity: 0, y: -10 }}
+//             transition={{ duration: 0.2 }}
+//             className="flex justify-between items-start p-3 bg-white rounded-lg shadow text-sm"
+//           >
+//             <div className="space-y-1">
+//               <p><strong>Nome do cliente:</strong> {entry.nome}</p>
+//               <p><strong>Número do caso:</strong> {entry.numeroCaso}</p>
+//               <p><strong>E-mail:</strong> {entry.destinatario}</p>
+//             </div>
+//             <button
+//               onClick={() => onRemove(entry.id)}
+//               className="text-red-600 font-bold hover:text-red-800 ml-4"
+//             >
+//               X
+//             </button>
+//           </motion.li>
+//         ))}
+//       </AnimatePresence>
+//     </ul>
+//   );
+// }
+
+// export default PendingEmailList;
+
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-function PendingEmailList({ entries, onRemove, onSendAll, isSending, styles }) {
+function PendingEmailList({ entries, onRemove }) {
   return (
-    <div style={styles.pendingListContainer}>
-      <h3 style={styles.pendingListTitle}>E-mails a Enviar ({entries.length})</h3>
-
-      <ul style={styles.pendingList}>
+    <ul className="space-y-4 w-full pr-1">
+      <AnimatePresence>
         {entries.map(entry => (
-          <li key={entry.id} style={styles.pendingListItem}>
-            <div style={styles.pendingItemWrapper}>
-              <div style={styles.pendingItemText}>
-                <span><strong>Nome do cliente:</strong> {entry.nome}</span>
-                <span><strong>Número do caso:</strong> {entry.numeroCaso}</span>
-                <span><strong>E-mail:</strong> {entry.destinatario}</span>
-              </div>
-              <button
-                onClick={() => onRemove(entry.id)}
-                style={styles.removePendingButton}
-              >
-                X
-              </button>
+          <motion.li
+            key={entry.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="flex justify-between items-start p-3 bg-white rounded-lg shadow text-sm"
+          >
+            <div className="space-y-1">
+              <p><strong>Nome do cliente:</strong> {entry.nome}</p>
+              <p><strong>Número do caso:</strong> {entry.numeroCaso}</p>
+              <p><strong>E-mail:</strong> {entry.destinatario}</p>
             </div>
-          </li>
+            <button
+              onClick={() => onRemove(entry.id)}
+              className="text-red-600 font-bold hover:text-red-800 ml-4"
+            >
+              X
+            </button>
+          </motion.li>
         ))}
-      </ul>
-
-      <button
-        onClick={onSendAll}
-        style={styles.sendAllButton}
-        disabled={isSending}
-      >
-        {isSending ? 'Enviando...' : 'Enviar Todos os E-mails'}
-      </button>
-    </div>
+      </AnimatePresence>
+    </ul>
   );
 }
 

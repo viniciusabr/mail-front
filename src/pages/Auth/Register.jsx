@@ -1,5 +1,16 @@
+import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
 import FormInput from "../../components/FormInput/FormInput";
 import useRegister from "./register";
+import Footer from "../../components/Footer/Footer";
+import Header from "../../components/Header/HeaderLogin";
+import HeaderRegister from "../../components/Header/HeaderRegister";
+import GradientButton from "../../components/GradientButton/GradientButton";
+import { Lock, Mail, User } from "lucide-react";
+
+const MotionForm = motion.form;
+const MotionAlert = motion.div;
 
 export default function Register() {
   const {
@@ -13,64 +24,111 @@ export default function Register() {
     handleEmailChange,
     handlePasswordChange,
     handleSubmit,
-    formError
+    formError,
+    setFormError,
   } = useRegister();
 
+  const [showError, setShowError] = useState(false);
+  const [errorKey, setErrorKey] = useState(0);
+
+  useEffect(() => {
+    if (formError) {
+      setShowError(false);
+
+      const delay = setTimeout(() => {
+        setErrorKey(prev => prev + 1)
+        setShowError(true);
+
+        const hide = setTimeout(() => {
+          setShowError(false);
+          setTimeout(() => setFormError(""), 300);
+        }, 4000);
+
+        return () => clearTimeout(hide);
+      }, 50);
+
+      return () => clearTimeout(delay);
+    }
+  }, [formError, setFormError]);
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm w-full bg-white p-6 rounded-xl shadow-lg">
-      <h2 className="text-xl font-semibold text-center">Registro</h2>
+    // <div className="flex flex-col items-center justify-center flex-1 w-full">
+    <div className="flex flex-col items-center justify-center w-full max-w-md gap-8">
 
-      <FormInput
-        type="text"
-        name="name"
-        placeholder="Nome"
-        autoComplete="name"
-        value={nameInput}
-        onChange={handleNameChange}
-        error={nameInputError && "Preencha o campo Nome."}
-      />
+      <Toaster position="top-right" />
+      <AnimatePresence>
+        {showError && (
+          <MotionAlert
+            key={errorKey}
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full bg-white rounded-xl shadow-lg border border-1 border-orange-500 p-8 space-y-6 text-black"
+          >
+            {formError}
+          </MotionAlert>
+        )}
+      </AnimatePresence>
 
-      <FormInput
-        type="email"
-        name="email"
-        placeholder="E-mail"
-        autoComplete="email"
-        value={emailInput}
-        onChange={handleEmailChange}
-        error={
-          emailInputError === "required"
-            ? "Preencha o campo E-mail."
-            : emailInputError === "invalid"
-              ? "Digite um e-mail válido."
-              : ""
-        }
-      />
+      <MotionForm
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: -50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full bg-white rounded-xl shadow-lg border border-1 border-orange-500 p-8 space-y-6 text-black"
+      >
+        <h2 className="text-2xl font-semibold text-center text-[#512DA8]">Registro</h2>
 
-      <FormInput
-        type="password"
-        name="password"
-        placeholder="Senha"
-        autoComplete="new-password"
-        value={passwordInput}
-        onChange={handlePasswordChange}
-        error={
-          passwordInputError === "required"
-            ? "Preencha o campo Senha."
-            : passwordInputError === "short"
-              ? "A senha precisa ter pelo menos 6 caracteres."
-              : ""
-        }
-      />
+        <FormInput
+          type="text"
+          name="name"
+          placeholder="Nome"
+          autoComplete="name"
+          value={nameInput}
+          onChange={handleNameChange}
+          error={nameInputError && "Preencha o campo Nome."}
+          icon={User}
+        />
 
-      {formError && (
-        <div className="text-red-600 text-sm text-center">
-          {formError}
-        </div>
-      )}
+        <FormInput
+          type="email"
+          name="email"
+          placeholder="E-mail"
+          autoComplete="email"
+          value={emailInput}
+          onChange={handleEmailChange}
+          error={
+            emailInputError === "required"
+              ? "Preencha o campo E-mail."
+              : emailInputError === "invalid"
+                ? "Digite um e-mail válido."
+                : ""
+          }
+          icon={Mail}
+        />
 
-      <button type="submit" className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-        Registrar
-      </button>
-    </form>
+        <FormInput
+          type="password"
+          name="password"
+          placeholder="Senha"
+          autoComplete="new-password"
+          value={passwordInput}
+          onChange={handlePasswordChange}
+          error={
+            passwordInputError === "required"
+              ? "Preencha o campo Senha."
+              : passwordInputError === "short"
+                ? "A senha precisa ter pelo menos 6 caracteres."
+                : ""
+          }
+          icon={Lock}
+        />
+
+        <GradientButton type="submit">Registrar</GradientButton>
+      </MotionForm>
+
+    </div>
   );
 }
+
