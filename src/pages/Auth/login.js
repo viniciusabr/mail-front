@@ -59,7 +59,7 @@ export default function useLoginForm() {
       localStorage.setItem('token', token);
       navigate('/send-emails');
     } catch (error) {
-      setFormError(error.message); // exibe msg genérica vinda do backend
+      setFormError(error.message);
     }
   };
 
