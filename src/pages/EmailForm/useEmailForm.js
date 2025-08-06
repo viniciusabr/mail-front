@@ -16,6 +16,36 @@ export default function useEmailForm() {
   const [casoError, setCasoError] = useState(false);
   const [validEmail, setValidEmail] = useState(false);
 
+  const toastErrorStyle = {
+    icon: '❌',
+    style: {
+      background: '#ffe5e5', // tom rosado claro
+      color: '#b91c1c',                 // vermelho escuro para o texto
+      fontWeight: 'bold',
+      borderLeft: '6px solid #dc2626', // vermelho vibrante
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+      borderRadius: '8px',
+    },
+    progressStyle: {
+      background: '#dc2626', // mesmo vermelho do destaque lateral
+    },
+  }
+
+  const toastSuccessStyle = {
+    icon: '📤',
+    style: {
+      background: '#f0fdf4',
+      color: '#065f46',
+      fontWeight: 'bold',
+      borderLeft: '6px solid #22c55e',
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+      borderRadius: '8px',
+    },
+    progressStyle: {
+      background: '#22c55e',
+    }
+  }
+
   const handleAddEntryToList = () => {
 
     let hasError = false;
@@ -44,20 +74,21 @@ export default function useEmailForm() {
     if (!isValidEmail(emailInput) && emailInput.length !== 0) {
       setEmailInputError(true);
       setValidEmail(true);
-      toast.error('Digite um e-mail válido');
+      toast.error('Endereço de e-mail inválido. Por favor, revise e tente novamente.', toastErrorStyle);
+
       return false
     }
 
 
     if (!/^\d+$/.test(numeroCaso) && numeroCaso.length !== 0) {
       setCasoError(true);
-      toast.error("O número do caso deve conter apenas números.");
+      toast.error('O número do caso deve conter apenas números.', toastErrorStyle);
       return false;
     }
 
     if (numeroCaso.length !== 8 && numeroCaso.length !== 0) {
       setCasoError(true);
-      toast.error("O número do caso deve ter exatamente 8 dígitos.");
+      toast.error('O número do caso deve ter exatamente 8 dígitos.', toastErrorStyle);
       return false;
     }
 
@@ -71,7 +102,7 @@ export default function useEmailForm() {
     );
 
     if (isDuplicate) {
-      toast.error('Esta entrada (Nome, Número do Caso, E-mail) já foi adicionada à lista.');
+      toast.error('Esta entrada (Nome, Número do Caso, E-mail) já foi adicionada à lista.', toastErrorStyle);
       return;
     }
 
@@ -87,7 +118,7 @@ export default function useEmailForm() {
     setNumeroCaso('');
     setEmailInput('');
     setEmailInputError(false);
-    toast.success('Informações adicionadas à lista de envios!');
+    toast.success('Informações adicionadas à lista de envios! 👌', toastSuccessStyle);
 
     return true
   };
@@ -113,10 +144,29 @@ export default function useEmailForm() {
 
     const payload = { data: dataToSend };
 
+    const totalPendingEmails = pendingEmailEntries.length;
+    const msgSuccess =
+      totalPendingEmails === 1
+        ? `O e-mail foi enviado com sucesso para a loja! 📬`
+        : `Todos os ${totalPendingEmails} e-mails foram enviados com sucesso para as respectivas lojas! 📬`;
 
     try {
       await sendEmails(payload);
-      toast.success(`Todos os ${pendingEmailEntries.length} e-mails foram enviados com sucesso!`);
+      toast.success(msgSuccess, {
+        icon: '📤',
+        style: {
+          background: '#e6ffed',
+          color: '#065f46',
+          fontWeight: 'bold',
+          borderLeft: '6px solid #34d399',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+          borderRadius: '8px',
+        },
+        progressStyle: {
+          background: '#34d399',
+        },
+      });
+
 
       setPendingEmailEntries([]);
     } catch (error) {

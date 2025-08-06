@@ -175,9 +175,15 @@ export default function EmailForm() {
               Adicionar à Lista
             </GradientButton>
 
-            <GradientButton type="button">
+            <GradientButton
+              type="button"
+              variant="none"
+              className="bg-[linear-gradient(to_right,_#6f42c1,_#9b5de5_50%,_#6f42c1)] text-white opacity-100 cursor-not-allowed"
+            >
               Exibir Registros
             </GradientButton>
+
+
           </MotionForm>
         ) : (
           <motion.div
@@ -222,7 +228,7 @@ export default function EmailForm() {
                 }
               />
 
-              <GradientButton type="button" onClick={onAddToList}>
+              <GradientButton type="button" onClick={onAddToList} >
                 Adicionar à Lista
               </GradientButton>
             </div>
@@ -230,8 +236,17 @@ export default function EmailForm() {
             {/* LISTA + BOTÃO */}
             <div className="flex flex-col justify-between w-1/2 gap-4 h-full -mt-11">
               <div>
-                <h3 className="text-white font-semibold text-lg text-center">
-                  E-mails a Enviar ({pendingEmailEntries.length})
+                <h3 className="text-white font-semibold text-lg flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-yellow-300">
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5H4.5a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-.659 1.591l-7.432 7.432a2.25 2.25 0 01-3.182 0L2.909 8.584A2.25 2.25 0 012.25 6.993V6.75" />
+                  </svg>
+                  <span>E-mails na Fila</span>
+                  <span className="bg-purple-100 text-purple-700 rounded-full px-2 py-0.5 text-xs font-bold">
+
+                    {pendingEmailEntries.length}
+                  </span>
                 </h3>
 
                 <div className="overflow-y-auto max-h-[500px] mt-4 pr-1">
@@ -242,7 +257,12 @@ export default function EmailForm() {
                 </div>
               </div>
 
-              <GradientButton type="button" onClick={handleSendAllEmails} disabled={isSending}>
+              <GradientButton
+                type="button"
+                onClick={handleSendAllEmails}
+                disabled={isSending}
+                variant="success"
+              >
                 {isSending ? "Enviando..." : "Enviar Todos os E-mails"}
               </GradientButton>
             </div>
