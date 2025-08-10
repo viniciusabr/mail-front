@@ -10,8 +10,8 @@ import EmailForm from "./pages/EmailForm/EmailForm";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Login from './pages/Auth/Login';
-import Register from './pages/Auth/Register';
+import Login from './pages/Auth/LoginPage';
+import Register from './pages/Auth/RegisterPage';
 import PageLayout from './components/PageLayout';
 import HeaderDashboard from './components/Header/HeaderDashboard';
 import HeaderRegister from './components/Header/HeaderRegister';
