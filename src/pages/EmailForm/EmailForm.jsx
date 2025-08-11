@@ -100,6 +100,7 @@ import FormInput from '../../components/FormInput/FormInput';
 import PendingEmailList from '../../components/PendingEmailList/PendingEmailList';
 import useEmailForm from './useEmailForm';
 import GradientButton from '../../components/GradientButton/GradientButton';
+import Logoff from '../../components/Logoff/Logoff'
 
 const MotionForm = motion.form;
 
@@ -127,6 +128,7 @@ export default function EmailForm() {
   };
 
   return (
+    
     <div className="flex flex-col items-center w-full max-w-6xl mx-auto px-4 py-10">
       <AnimatePresence>
         {!layoutShifted ? (
@@ -139,7 +141,9 @@ export default function EmailForm() {
             transition={{ duration: 0.3 }}
             className="w-full max-w-md bg-white rounded-xl shadow-lg border border-orange-500 p-8 space-y-6 text-black"
           >
-            <h2 className="text-2xl font-semibold text-center text-[#512DA8]">Enviar e-mail</h2>
+            <Logoff/>
+            <h2 className="text-2xl font-semibold text-center text-[#512DA8]">Enviar e-mail </h2> 
+            
 
             <FormInput
               type="text"
