@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../../services/emailService";
+import { toast } from "react-toastify";
 
 export default function useRegister() {
   const [nameInput, setNameInput] = useState("");
@@ -79,8 +80,9 @@ export default function useRegister() {
 
       console.log("Resultado do register:", result);
       console.log("Token retornado:", result?.token);
-
-      navigate("/send-emails");
+      
+      toast('Registro realizado com sucesso! Faça login!')
+      navigate("/auth/login");
 
     } catch (error) {
       console.error("Erro ao registrar:", error.response?.data || error.message);
