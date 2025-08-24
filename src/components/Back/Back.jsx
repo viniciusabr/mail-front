@@ -10,7 +10,6 @@ export default function Back(){
 
     return(
        <div style={{width:'10px'}}>
-      {/* Seta fixa para voltar */}
       <ArrowIcon  size={30} onClick={() => navigate(-1)} />
     </div>
     )
