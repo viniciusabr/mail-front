@@ -81,12 +81,11 @@ export default function useRegister() {
       console.log("Resultado do register:", result);
       console.log("Token retornado:", result?.token);
       
-      toast('Registro realizado com sucesso! Faça login!')
+      toast.success('Registro realizado com sucesso! Peça ao seu líder para ativar o cadastro!')
       navigate("/auth/login");
 
     } catch (error) {
       console.error("Erro ao registrar:", error.response?.data || error.message);
-      setFormError(error.message)
       throw error;
     }
 

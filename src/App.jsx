@@ -17,6 +17,7 @@ import HeaderLogin from './components/Header/HeaderLogin';
 import PageLayoutRegister from './components/PageLayoutRegister';
 import PageLayoutSendMail from './components/PageLayoutSendMail';
 import PrivateRoute from "./routes/PrivateRoute";
+import PainelAdmistrativo from './pages/PainelAdminstrativo/PainelAdmistrativo';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -64,6 +65,19 @@ createRoot(document.getElementById("root")).render(
             >
               <Login />
             </PageLayout>
+          }
+        />
+        <Route
+          path="/painel"
+          element={
+            <PrivateRoute>
+            <PageLayout
+              showHeader={true}
+              header={<HeaderLogin />}
+            >
+              <PainelAdmistrativo />
+            </PageLayout>
+            </PrivateRoute>
           }
         />
       </Routes>
