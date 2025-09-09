@@ -1,39 +1,58 @@
 import React, { useState } from "react";
 import Footer from "./Footer/Footer";
 import HeaderDashboard from "./Header/HeaderDashboard";
-import Sidebar from "../components/Sidebar/Sidebar"; // importa o sidebar
+import Sidebar from "../components/Sidebar/Sidebar"; // sidebar comum
+import SidebarAdm from "./Sidebar/SidebarAdm"; // sidebar admin
+import { useCurrentUser } from "../hook/useCurrentUser.js";
 
-export default function PageLayoutSendMail({
-  children,
-  header = <HeaderDashboard />,
-  showHeader = true,
+export default function PageLayoutSendMail({ 
+  children, 
+  header = <HeaderDashboard />, 
+  showHeader = true 
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // controla sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useCurrentUser();
+
+  // Se ainda estiver carregando
+  if (user === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-white">
+        <p>Carregando usuário...</p>
+      </div>
+    );
+  }
+
+  // Se o usuário não estiver logado
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-white">
+        <p>Usuário não autenticado. Faça login para continuar.</p>
+      </div>
+    );
+  }
+
+  // Escolhe sidebar de acordo com admin
+  const SidebarComponent = user.user_adm ? SidebarAdm : Sidebar;
 
   return (
     <div className="flex min-h-screen w-full bg-gradient-to-br from-[#4c1d95] via-[#5b21b6] to-[#3b0764]">
-      {/* SIDEBAR */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <SidebarComponent isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      {/* CONTEÚDO PRINCIPAL */}
       <div
         className={`flex flex-col flex-1 transition-all duration-300 ${
           isSidebarOpen ? "ml-64" : "ml-20"
         }`}
       >
-        {/* HEADER */}
         {showHeader && (
           <header className="flex flex-col items-center justify-center h-32 text-center w-full">
             {header}
           </header>
         )}
 
-        {/* MAIN */}
         <main className="flex-grow flex flex-col items-center justify-start overflow-y-auto px-4">
           {children}
         </main>
 
-        {/* FOOTER */}
         <footer className="mt-6 w-full">
           <Footer />
         </footer>

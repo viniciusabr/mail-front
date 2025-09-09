@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useCurrentUser } from "../hook/useCurrentUser";
 
-const PrivateRoute = ({ children }) => {
+const PrivateRouteAdmin = ({ children }) => {
   const { user } = useCurrentUser();
 
   // Enquanto carrega o usuário
@@ -14,12 +14,12 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  // Se não estiver logado, redireciona para login
-  if (!user) {
+  // Se não estiver logado ou não for admin
+  if (!user || !user.user_adm) {
     return <Navigate to="/auth/login" replace />;
   }
 
   return children;
 };
 
-export default PrivateRoute;
+export default PrivateRouteAdmin;

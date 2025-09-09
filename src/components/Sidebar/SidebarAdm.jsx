@@ -1,7 +1,7 @@
-import { Home, User, Settings, LogOut, AlignJustify, StickyNote } from "lucide-react";
+import { Home, User, Settings, LogOut, AlignJustify, StickyNote, LayoutDashboard } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function SidebarAdm({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -9,6 +9,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: "Início", icon: <Home size={20} />, path: "/send-emails" },
     { name: "Perfil", icon: <User size={20} />, path: "/perfil" },
     { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/config" },
+    { name: "Dashbord", icon: <LayoutDashboard size={20} />, path: "/dashbord" },
+    { name: "Painel Administração", icon: <Settings size={20} />, path: "/painel" }
   ];
 
   function handleLogout() {

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar/Sidebar";
+import SidebarAdm from "../../components/Sidebar/SidebarAdm";
 import UserTable from "../../components/UserTable/UserTable";
 import { getUsers, toggleUserStatus as apiToggleUserStatus, updateUserAdmin } from "../../services/emailService";
 
 export default function PainelAdmistrativo() {
   const [users, setUsers] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [search, setSearch] = useState(""); // estado da pesquisa
 
   useEffect(() => {
@@ -59,14 +59,14 @@ export default function PainelAdmistrativo() {
 
   return (
     <div className="flex">
-      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+      <SidebarAdm isOpen={isOpen} setIsOpen={setIsOpen} />
 
       <div
         className={`flex-1 min-h-screen p-10 transition-all duration-300 ${
           isOpen ? "ml-64" : "ml-20"
         }`}
       >
-        <div className="bg-white shadow-lg rounded-xl w-[890px] max-w-6xl mx-auto p-8 mt-16">
+        <div className="bg-white shadow-lg rounded-xl w-[890px] max-w-6xl mx-auto p-8">
           <h1 className="text-2xl font-semibold mb-6">Usuários</h1>
 
           {/* Caixa de pesquisa alinhada à direita */}

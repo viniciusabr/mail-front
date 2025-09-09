@@ -11,25 +11,32 @@ import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Auth/LoginPage';
 import Register from './pages/Auth/RegisterPage';
 import PageLayout from './components/PageLayout';
+import PageLayoutRegister from './components/PageLayoutRegister';
+import PageLayoutSendMail from './components/PageLayoutSendMail';
 import HeaderDashboard from './components/Header/HeaderDashboard';
 import HeaderRegister from './components/Header/HeaderRegister';
 import HeaderLogin from './components/Header/HeaderLogin';
-import PageLayoutRegister from './components/PageLayoutRegister';
-import PageLayoutSendMail from './components/PageLayoutSendMail';
+import Dashboard from './pages/Dashboard/Dashboard';
+
 import PrivateRoute from "./routes/PrivateRoute";
+import PrivateRouteAdmin from "./routes/PrivateRouteAdm";
 import PainelAdmistrativo from './pages/PainelAdminstrativo/PainelAdmistrativo';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* Redirecionamento padrão baseado no token */}
+        {/* Redirecionamento padrão baseado no usuário salvo */}
         <Route
           path="/"
-          element={<Navigate to={localStorage.getItem("token") ? "/send-emails" : "/auth/login"} />}
+          element={
+            <Navigate
+              to={localStorage.getItem("user") ? "/send-emails" : "/auth/login"}
+            />
+          }
         />
 
-        {/* Rota protegida */}
+        {/* Rota protegida para envio de emails */}
         <Route
           path="/send-emails"
           element={
@@ -44,6 +51,7 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
+        {/* Rota de registro */}
         <Route
           path="/auth/register"
           element={
@@ -56,6 +64,7 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
+        {/* Rota de login */}
         <Route
           path="/auth/login"
           element={
@@ -67,20 +76,38 @@ createRoot(document.getElementById("root")).render(
             </PageLayout>
           }
         />
+
+        {/* Rota protegida para painel administrativo */}
         <Route
           path="/painel"
           element={
-            <PrivateRoute>
-            <PageLayout
-              showHeader={true}
-              header={<HeaderLogin />}
-            >
-              <PainelAdmistrativo />
-            </PageLayout>
-            </PrivateRoute>
+            <PrivateRouteAdmin>
+              <PageLayoutSendMail
+                showHeader={true}
+                header={<HeaderDashboard />}
+              >
+                <PainelAdmistrativo />
+              </PageLayoutSendMail>
+            </PrivateRouteAdmin>
+          }
+        />
+
+        <Route
+          path="/dashbord"
+          element={
+            <PrivateRouteAdmin>
+              <PageLayoutSendMail
+                showHeader={true}
+                header={<HeaderDashboard />}
+              >
+                <Dashboard/>
+               
+              </PageLayoutSendMail>
+            </PrivateRouteAdmin>
           }
         />
       </Routes>
+
       <ToastContainer />
     </BrowserRouter>
   </StrictMode>
