@@ -67,3 +67,53 @@ export const updateUserAdmin = async (id, isAdmin) => {
   const response = await axios.patch(`${BASE_URL}/${id}/admin`, { isAdmin });
   return response.data.user;
 };
+
+//pega o perfil do usuário logado
+export const getProfile = async () => {
+  const token = getToken(); // pega token do localStorage
+
+  try {
+    const response = await axios.get("http://localhost:3000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    return response.data; // retorna objeto do usuário
+  } catch (error) {
+    const message = error.response?.data?.error || error.message || "Erro ao buscar perfil";
+    toast.error(message);
+    throw new Error(message);
+  }
+};
+
+export const updateProfile = async (data) => {
+  const token = getToken();
+  try {
+    const response = await axios.put(`http://localhost:3000/api/users/me`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success(response.data.message);
+    return response.data.user;
+  } catch (error) {
+    const message = error.response?.data?.error || error.message || "Erro ao atualizar perfil";
+    toast.error(message);
+    throw new Error(message);
+  }
+};
+
+// Alterar senha
+export const changePassword = async ({ oldPassword, newPassword }) => {
+  const token = getToken();
+  try {
+    const response = await axios.put(
+      `http://localhost:3000/api/users/me/password`,
+      { oldPassword, newPassword },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    toast.success(response.data.message);
+    return true;
+  } catch (error) {
+    const message = error.response?.data?.error || error.message || "Erro ao alterar senha";
+    toast.error(message);
+    throw new Error(message);
+  }
+};

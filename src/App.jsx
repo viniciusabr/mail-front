@@ -14,9 +14,12 @@ import PageLayout from './components/PageLayout';
 import PageLayoutRegister from './components/PageLayoutRegister';
 import PageLayoutSendMail from './components/PageLayoutSendMail';
 import HeaderDashboard from './components/Header/HeaderDashboard';
+import HeaderProfile from './components/Header/HeaderProfile';
 import HeaderRegister from './components/Header/HeaderRegister';
 import HeaderLogin from './components/Header/HeaderLogin';
+import HeaderAdministrativo from './components/Header/HeaderAdminstrativo'
 import Dashboard from './pages/Dashboard/Dashboard';
+import Profile from './pages/Profile/ProfilePage'
 
 import PrivateRoute from "./routes/PrivateRoute";
 import PrivateRouteAdmin from "./routes/PrivateRouteAdm";
@@ -84,7 +87,7 @@ createRoot(document.getElementById("root")).render(
             <PrivateRouteAdmin>
               <PageLayoutSendMail
                 showHeader={true}
-                header={<HeaderDashboard />}
+                header={<HeaderAdministrativo />}
               >
                 <PainelAdmistrativo />
               </PageLayoutSendMail>
@@ -104,6 +107,20 @@ createRoot(document.getElementById("root")).render(
                
               </PageLayoutSendMail>
             </PrivateRouteAdmin>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <PageLayoutSendMail
+                showHeader={true}
+                header={<HeaderProfile />}
+              >
+                <Profile/>
+               
+              </PageLayoutSendMail>
+            </PrivateRoute>
           }
         />
       </Routes>

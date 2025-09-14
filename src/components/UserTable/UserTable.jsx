@@ -4,7 +4,7 @@ export default function UserTable({ users, onToggleStatus, onToggleAdmin }) {
   }
 
   return (
-    <table className="w-full border-collapse">
+    <table className="w-full border-collapse ">
       <thead>
         <tr>
           <th className="border p-2">ID</th>

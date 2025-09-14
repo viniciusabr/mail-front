@@ -5,13 +5,13 @@ import { getUsers, toggleUserStatus as apiToggleUserStatus, updateUserAdmin } fr
 
 export default function PainelAdmistrativo() {
   const [users, setUsers] = useState([]);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState(""); // estado da pesquisa
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await getUsers();
+        const data = await getUsers();0,
         setUsers(data);
       } catch (error) {
         console.error("Erro ao buscar usuários:", error);
@@ -66,7 +66,7 @@ export default function PainelAdmistrativo() {
           isOpen ? "ml-64" : "ml-20"
         }`}
       >
-        <div className="bg-white shadow-lg rounded-xl w-[890px] max-w-6xl mx-auto p-8">
+        <div className="bg-white shadow-lg rounded-xl w-[890px] max-w-6xl mx-auto p-8 border border-orange-500">
           <h1 className="text-2xl font-semibold mb-6">Usuários</h1>
 
           {/* Caixa de pesquisa alinhada à direita */}

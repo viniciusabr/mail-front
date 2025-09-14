@@ -7,8 +7,8 @@ export default function SidebarAdm({ isOpen, setIsOpen }) {
 
   const menuItems = [
     { name: "Início", icon: <Home size={20} />, path: "/send-emails" },
-    { name: "Perfil", icon: <User size={20} />, path: "/perfil" },
-    { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/config" },
+    { name: "Perfil", icon: <User size={20} />, path: "/profile" },
+    { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/send-emails" },
     { name: "Dashbord", icon: <LayoutDashboard size={20} />, path: "/dashbord" },
     { name: "Painel Administração", icon: <Settings size={20} />, path: "/painel" }
   ];
