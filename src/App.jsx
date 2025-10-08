@@ -20,6 +20,7 @@ import HeaderLogin from './components/Header/HeaderLogin';
 import HeaderAdministrativo from './components/Header/HeaderAdminstrativo'
 import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Profile/ProfilePage'
+import TemplateGenerator from './pages/Templates/TemplateGeneratorPage';
 
 import PrivateRoute from "./routes/PrivateRoute";
 import PrivateRouteAdmin from "./routes/PrivateRouteAdm";
@@ -103,8 +104,8 @@ createRoot(document.getElementById("root")).render(
                 showHeader={true}
                 header={<HeaderDashboard />}
               >
-                <Dashboard/>
-               
+                <Dashboard />
+
               </PageLayoutSendMail>
             </PrivateRouteAdmin>
           }
@@ -117,15 +118,27 @@ createRoot(document.getElementById("root")).render(
                 showHeader={true}
                 header={<HeaderProfile />}
               >
-                <Profile/>
-               
+                <Profile />
+
               </PageLayoutSendMail>
             </PrivateRoute>
           }
         />
+
+        <Route path="/templates" element={<TemplateGenerator />} />
+
       </Routes>
 
       <ToastContainer />
     </BrowserRouter>
   </StrictMode>
 );
+
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker
+//       .register("/sw.js")
+//       .then((reg) => console.log("[SW] registrado em:", reg.scope))
+//       .catch((err) => console.log("[SW] erro ao registrar:", err))
+//   })
+// }

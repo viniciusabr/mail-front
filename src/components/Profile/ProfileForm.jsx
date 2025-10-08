@@ -26,7 +26,7 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
       </div>
 
       {/* Email */}
-      <div>
+      {/* <div>
         <label className="block text-gray-700 font-medium mb-1">Email:</label>
         <input
           type="email"
@@ -34,7 +34,7 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
           onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-      </div>
+      </div> */}
 
       <button
         type="submit"

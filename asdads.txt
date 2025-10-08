@@ -1,0 +1,297 @@
+# Visão geral
+
+* Objetivo: plataforma para enviar e-mails CSAT e comunicados em massa.
+* Stack:
+
+  * Back: Node + Express, Sequelize, Bull (fila), Nodemailer (SMTP O365), JWT, Winston, MJML.
+  * Front: React + React Router, Tailwind, Framer Motion, Toastify; testes com WebLLM (WebGPU) para IA no navegador.
+* Arquitetura: back e front separados.
+* IA: no front, via WebGPU (modelo Llama-3-8B-Instruct-q4f16\_1-MLC) pelo `@mlc-ai/web-llm`.
+* Fluxo principal: usuário cria/edita corpo do e-mail (com IA opcional), define assunto e destinatário(s), e envia. Envio no back usa fila (+ logs e retentativas).
+
+---
+
+# Backend (pasta `mail/`)
+
+## Entradas principais
+
+* `src/app.js`: inicializa Express, CORS, Helmet, conecta DB, registra rotas e middlewares globais (Bull Board incluso).
+* `src/server.js`: sobe servidor e carrega `jobs/email.processor.js`.
+
+## Rotas (todas sob `/api`)
+
+* Auth
+
+  * `POST /api/auth/register`
+
+    * Regra: apenas e-mails @linx.com.br aceitos (validação no controller).
+  * `POST /api/auth/login`
+
+    * Rate limit: 5 tentativas/15min (`login.limiter.js`).
+    * Retorna `{ token, user }`.
+
+* Users (perfil do usuário autenticado)
+
+  * `GET /api/users/me`
+  * `PUT /api/users/me`
+  * `PUT /api/users/me/password`
+  * Middleware `authenticate` (JWT).
+  * Logs de sucesso/erro consistentes.
+
+* E-mails
+
+  * `POST /api/email/send`
+
+    * Middleware: `authenticate` + `limiter` (40/dia).
+    * Body esperado: `{ data: [{ name, email, caso, data }, ...] }`.
+    * Controller valida: máx. 40, duplicados (`validate.duplicates.js`) e schema (`customersArraySchema`).
+    * Service `sendCustomerEmails`:
+
+      * Valida e-mail com `validator`.
+      * Para cada destinatário → add job na fila (Bull) com `addEmailToQueue`.
+      * Retorna `{ success: [...], failed: [...] }`.
+
+* Templates (IA / gestão de templates)
+
+  * `POST /api/templates/generate` → implementada
+
+    * Controller valida `prompt`.
+    * Service retorna estratégia “client-llm” (para o front chamar IA local) + `systemPrompt`, `outputSpec` e `userPrompt`.
+  * `POST /api/templates/save` → stub
+  * `GET /api/templates` → stub
+  * `GET /api/templates/:id` → stub
+
+* Admin
+
+  * `GET /api/admin/users` → lista usuários (id, name, email, status, user\_adm).
+  * `PATCH /api/admin/users/:id/status` → atualiza status para `ativo|inativo`.
+
+## Fila e envio
+
+* Bull Queue (`queues/email.queue.js`):
+
+  * Redis: `REDIS_HOST`, `REDIS_PORT` via `.env`.
+  * `limiter.max=1, duration=3000` → 1 job a cada 3s (protege SMTP).
+* Job (`jobs/email.job.js`):
+
+  * Processa com concorrência 1.
+  * Gera corpo HTML a partir de MJML + variáveis (`utils/generateSurveyReminder.js`) quando usar template MJML.
+  * Envia com Nodemailer (SMTP Office365, host `smtp.office365.com`, 587).
+  * Retentativas: 3, backoff 5s.
+  * Loga em `EmailLog` com `PENDING/SUCCESS/FAILED`, `sent_at` e `error_message`.
+
+## Modelos (Sequelize)
+
+* `User`, `Customer`, `EmailLog`, `Contact`.
+* DB config em `src/database` + `src/config/database.js`. Conexão testada em `database/index.js`.
+
+## Segurança/limites
+
+* JWT via `JWT_SECRET`.
+* Rate limiting:
+
+  * Login: 5/15min.
+  * Envio e-mails: 40/dia (além do controller limitar lote de até 40).
+* Helmet habilitado.
+
+## Logger
+
+* `winston` configurado em `config/logger.js` (console + arquivo `logs/error.log` só para `error`).
+* Padrão observado:
+
+  * Controller: validações, in/out e mensagens legíveis (com emojis para nível).
+  * Service: passos internos e erros lançados com `statusCode` quando aplicável.
+  * Fila/Processor: tentativa X/Y, status final, persistência de log.
+
+## Observações (técnicas e TODOs)
+
+* `template.service.js` retorna hoje metadados para o front operar a IA local (client-LLM). Não conversa com provedor externo.
+* Conversão MJML → HTML já existe via `mjml2html` utilitário (para quando você quiser suporte a MJML).
+* TODOs de templates:
+
+  * Implementar `save`, `list`, `getById` (com tabela `templates` e owner `user_id`).
+  * Sanitização de HTML no back ao salvar/usar conteúdo (evitar XSS).
+* Env: garantir `.env` com `OUTLOOK_USER`, `OUTLOOK_PASS`, `JWT_SECRET`, `REDIS_HOST`, `REDIS_PORT`, DB creds. Não versionar.
+
+---
+
+# Frontend (pasta `mail-front/`)
+
+## App e rotas
+
+* `src/App.jsx`:
+
+  * Redireciona `/` → `/send-emails` se `localStorage.user` existe; senão `/auth/login`.
+  * Rotas protegidas por `PrivateRoute` e `PrivateRouteAdmin`.
+  * Páginas:
+
+    * `/send-emails` → EmailForm (principal de envios).
+    * `/auth/register` → Register.
+    * `/auth/login` → Login.
+    * `/painel` → Painel administrativo.
+    * `/dashbord` → Dashboard (typo no path).
+    * `/profile` → Perfil.
+    * `/test-ia` → página de teste IA.
+    * `/templates` → TemplateGeneratorPage (arquivo existe mas veio vazio no zip).
+* Layouts e Headers: `PageLayout*` e headers específicos por página.
+* UI/FX: `framer-motion`, `toastify`.
+
+## Páginas
+
+* EmailForm
+
+  * Campos: nome, número do caso, e-mail (validado), lista de pendentes, remover item, confirmações.
+  * Monta payload `data: [{ name, email, caso, data }]`.
+  * Chama `sendEmails` (service).
+  * Feedback com toasts.
+* Auth: Login/Register.
+* Profile: dados do usuário, update perfil e senha.
+* Painel/Dashboard: presentes; detalhes não críticos para o fluxo de envio.
+* TestIA: faz chamada à IA via `llmClient`, exibia JSON/resultado em `<pre>`.
+
+## Serviços
+
+* `services/api.js`: axios com `baseURL: http://localhost:3000/`.
+* `services/emailService.js`:
+
+  * Usa token de `localStorage`.
+  * Rota atual para envio: `POST /api/email/send`.
+  * Trata erros e exibe toasts.
+* `services/llmClient.js` (IA local via WebGPU):
+
+  * `initLLM()` → `webllm.CreateMLCEngine("Llama-3-8B-Instruct-q4f16_1-MLC")`.
+  * `runPrompt({ systemPrompt, userPrompt })` → `llm.chat.completions.create(...)`; retorna `message.content`.
+  * Observação: o arquivo do zip mostra cortes `...` nos trechos, mas a estrutura essencial confere.
+
+## Editor rico (Tiptap)
+
+* Não está no zip o componente `RichTextEditor` (aquele com bold/italic/list/link).
+* TemplateGeneratorPage.jsx está vazio.
+* Proposta já alinhada no chat:
+
+  * Campos: Prompt, Assunto, Destinatário, Editor (corpo).
+  * Botão “Gerar com IA”: chama `initLLM` + `runPrompt`; resultado cai direto no editor.
+  * Sem preview duplicado (o editor já é o preview).
+
+---
+
+# Fluxos “fim a fim”
+
+## 1) Envio de e-mails em massa
+
+1. Front `/send-emails`: usuário preenche dados dos destinatários → monta `data` (máx. 40).
+2. `POST /api/email/send` com JWT.
+3. Back valida + dedup + schema → chama service.
+4. Service enfileira cada destinatário (`addEmailToQueue`).
+5. Processor pega job, gera corpo (pode ser a partir de MJML), envia via SMTP O365, registra EmailLog.
+6. Controller devolve `{ success, failed }`.
+
+## 2) Geração de template com IA (client-side, WebGPU)
+
+1. Front `/templates`: usuário digita prompt, clica em Gerar.
+2. `llmClient.runPrompt(systemPrompt ajustado)` retorna texto ou HTML.
+3. Resultado entra no RichTextEditor (usuário pode editar).
+4. Usuário define Assunto e Destinatário.
+5. (Opcional) Salvar o template (`POST /api/templates/save`) – ainda não implementado.
+
+---
+
+# Regras e padrões de projeto
+
+* Rotas semânticas: `POST /api/email/send`, `POST /api/templates/generate`, `GET/PUT /api/users/me`, etc.
+* Commits: `feat:`, `refactor:`, `fix:` em PT-BR.
+* Logs: controller loga entrada/validações/saída; service loga passos internos e erros; fila loga tentativas e status final.
+* Limites: 40/dia por usuário (rate limit) + 40 por lote (controller).
+* IA:
+
+  * Para preview/edição no front: pedir SOMENTE o corpo do e-mail em HTML simples (sem assunto, sem JSON).
+  * Para assunto + corpo automático: pedir JSON `{ "subject": "...", "body": "<html>..." }` e fazer o parse.
+  * Encerramento padrão (“Atenciosamente, Equipe Linx”): deixe explícito no `systemPrompt`.
+
+---
+
+# Gaps / riscos / próximos passos (priorizados)
+
+1. TemplateGeneratorPage.jsx vazio + RichTextEditor ausente
+
+   * Implementar a página e o componente (Tiptap) conforme o desenho que alinhamos: Prompt → Gerar com IA → preenche Editor → Assunto/Destinatário → Enviar.
+
+2. Sanitização HTML
+
+   * Antes de enviar/salvar, sanitizar HTML (ex.: `sanitize-html`) para evitar XSS.
+
+3. Salvar templates
+
+   * Criar tabela `templates` (id, user\_id, name, subject, body\_html, body\_mjml?, created\_at, updated\_at).
+   * Implementar `POST /api/templates/save`, `GET /api/templates`, `GET /api/templates/:id`.
+
+4. Config SMTP/Redis/DB por ambiente
+
+   * `.env` completo + documentação de variáveis.
+   * Subir Redis no ambiente (ou usar serviço gerenciado).
+
+5. Feedback no front do processamento assíncrono
+
+   * Após enfileirar, permitir o usuário ver histórico/resultado (tela simples lendo `EmailLog` por usuário).
+
+6. Validações no front
+
+   * Limitar 40 itens por envio (coerente com back).
+   * Validação de e-mail e campos obrigatórios com erros claros (já tem parte disso no hook).
+
+---
+
+# Prompts “prontos” (práticos)
+
+### Só corpo do e-mail (HTML simples, sem assunto)
+
+```
+Você gera e-mails de CSAT ou comunicados gerais.
+Responda SOMENTE com o corpo do e-mail, em HTML básico (<p>, <br>, <strong>).
+Não inclua assunto, título, cabeçalho, assinatura extra, nem explicações.
+Finalize com:
+<p>Atenciosamente,<br/>Equipe Linx</p>
+```
+
+### Assunto + corpo (JSON)
+
+```
+Você gera e-mails de CSAT ou comunicados gerais.
+Responda APENAS com JSON válido:
+{
+  "subject": "string",
+  "body": "<html>...</html>"
+}
+Nada além disso.
+Finalize o body com:
+<p>Atenciosamente,<br/>Equipe Linx</p>
+```
+
+---
+
+# Como o agente deve te ajudar (modo tutor)
+
+* Baby steps: um passo por vez (Hello World → demo isolada → integração).
+* Formato fixo em cada resposta:
+
+  * Objetivo (1 linha)
+  * Passo atual (comando/código curto + caminho do arquivo)
+  * Teste/Verificação (o que ver no navegador/console)
+  * Resultado esperado
+  * “Prosseguo?”
+* Sem solução gigante de primeira; só depois de você validar
+* Depuração: reproduzir erro → destacar mensagem útil → hipótese → fix mínimo → causa raiz.
+
+---
+
+## O que eu confirmei no código (pontos-chave)
+
+* Routes e middlewares de auth/ratelimit funcionam e estão bem separados.
+* Fila com Bull + Redis está correta e limitada para não sobrecarregar SMTP.
+* Nodemailer configurado para Office365.
+* Logs padronizados com Winston em controllers/services/processor.
+* `/api/templates/generate` devolve hoje o pacote de instruções para o front operar IA local (estratégia `client-llm`).
+* Front: `EmailForm` completo; `TemplateGeneratorPage.jsx` vazio; `llmClient.js` configurado para WebLLM; `TestIA` existe.
+
+---
+

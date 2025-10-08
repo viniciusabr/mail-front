@@ -8,7 +8,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const menuItems = [
     { name: "Início", icon: <Home size={20} />, path: "/send-emails" },
     { name: "Perfil", icon: <User size={20} />, path: "/profile" },
-    { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/send-emails" },
+    { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/templates" },
+    { name: "Configurações", icon: <Settings size={20} />, path: "/settings" },
   ];
 
   function handleLogout() {
@@ -19,41 +20,57 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen ${
-        isOpen ? "w-64" : "w-20"
-      } bg-violet-950 text-white transition-all duration-300 flex flex-col`}
+      className={`fixed top-0 left-0 h-screen 
+        ${isOpen ? "w-64" : "w-20"} 
+        bg-violet-950 text-white 
+        transition-all duration-300 flex flex-col shadow-lg`}
     >
-      {/* Botão de toggle */}
-      <button
-        className="p-3 hover:bg-purple-700"
-        onClick={() => setIsOpen(!isOpen)}
+      {/* Header com toggle */}
+      <div
+        className={`flex items-center border-b border-purple-800 transition-all ${isOpen ? "justify-between px-3 py-3" : "justify-center py-3"
+          }`}
       >
-        <AlignJustify />
-      </button>
+        {isOpen && <span className="text-lg font-bold">Mail CSAT</span>}
+        <button
+          className="p-2 rounded-md hover:bg-purple-800"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <AlignJustify />
+        </button>
+      </div>
 
       {/* Menu */}
-      <nav className="flex-1 mt-4">
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            onClick={() => navigate(item.path)}
-            className={`flex items-center gap-3 p-3 cursor-pointer rounded-md transition-colors
-              ${location.pathname === item.path ? "bg-purple-700" : "hover:bg-purple-800"}
-            `}
-          >
-            {item.icon}
-            {isOpen && <span>{item.name}</span>}
-          </div>
-        ))}
+      <nav className="flex-1 mt-4 space-y-1">
+        {menuItems.map((item, index) => {
+          const active = location.pathname === item.path;
+          return (
+            <div
+              key={index}
+              onClick={() => navigate(item.path)}
+              className={`flex items-center py-2 cursor-pointer rounded-md transition-colors
+    ${active ? "bg-purple-700 border-l-4 border-yellow-300 text-yellow-300" : "hover:bg-purple-800"}
+    ${isOpen ? "px-3 gap-3 justify-start" : "justify-start pl-5"}
+  `}
+            >
+              {item.icon}
+              {isOpen && <span className="text-sm font-medium">{item.name}</span>}
+            </div>
+
+          );
+        })}
       </nav>
 
-      {/* Footer */}
-      <div
-        onClick={handleLogout}
-        className="p-3 hover:bg-red-700 cursor-pointer flex items-center gap-3 transition-colors"
-      >
-        <LogOut size={20} />
-        {isOpen && <span>Sair</span>}
+      {/* Footer - Logout */}
+      <div className="border-t border-purple-800">
+        <div
+          onClick={handleLogout}
+          className={`flex items-center cursor-pointer transition-colors hover:bg-red-700
+            ${isOpen ? "px-3 gap-3 justify-start py-3" : "justify-center py-3"}
+          `}
+        >
+          <LogOut size={20} />
+          {isOpen && <span className="text-sm font-medium">Sair</span>}
+        </div>
       </div>
     </div>
   );

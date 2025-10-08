@@ -1,4 +1,4 @@
-import { Home, User, Settings, LogOut, AlignJustify, StickyNote, LayoutDashboard } from "lucide-react";
+import { Home, User, Settings, LogOut, AlignJustify, Mail, LayoutDashboard, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function SidebarAdm({ isOpen, setIsOpen }) {
@@ -8,10 +8,13 @@ export default function SidebarAdm({ isOpen, setIsOpen }) {
   const menuItems = [
     { name: "Início", icon: <Home size={20} />, path: "/send-emails" },
     { name: "Perfil", icon: <User size={20} />, path: "/profile" },
-    { name: "Cadastrar Templates", icon: <StickyNote size={20} />, path: "/send-emails" },
+    { name: "E-mails CSAT", icon: <Mail size={20} />, path: "/send-emails" },
+    { name: "Templates IA", icon: <Sparkles size={20} />, path: "/templates" },
     { name: "Dashbord", icon: <LayoutDashboard size={20} />, path: "/dashbord" },
     { name: "Painel Administração", icon: <Settings size={20} />, path: "/painel" }
   ];
+
+
 
   function handleLogout() {
     localStorage.removeItem("token");
@@ -21,9 +24,8 @@ export default function SidebarAdm({ isOpen, setIsOpen }) {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen ${
-        isOpen ? "w-64" : "w-20"
-      } bg-violet-950 text-white transition-all duration-300 flex flex-col`}
+      className={`fixed top-0 left-0 h-screen ${isOpen ? "w-64" : "w-20"
+        } bg-violet-950 text-white transition-all duration-300 flex flex-col`}
     >
       {/* Botão de toggle */}
       <button

@@ -14,7 +14,7 @@ export const sendEmails = async (payload) => {
   const token = getToken();
 
   try {
-    await axios.post('http://localhost:3000/api/customers', payload, {
+    await axios.post('http://localhost:3000/api/email/send', payload, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return true;
