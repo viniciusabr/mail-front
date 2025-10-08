@@ -2,7 +2,7 @@ import './styles/tailwind.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import EmailForm from "./pages/EmailForm/EmailForm";
 import { ToastContainer } from 'react-toastify';
@@ -28,7 +28,7 @@ import PainelAdmistrativo from './pages/PainelAdminstrativo/PainelAdmistrativo';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Redirecionamento padrão baseado no usuário salvo */}
         <Route
@@ -130,7 +130,7 @@ createRoot(document.getElementById("root")).render(
       </Routes>
 
       <ToastContainer />
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 );
 
