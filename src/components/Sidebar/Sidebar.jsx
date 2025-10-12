@@ -14,7 +14,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const filteredMenu = import.meta.env.MODE === 'development'
     ? menuItems
-    : menuItems.filter((item) => item.path !== "/templates" || "settings")
+    : menuItems.filter(
+      (item) => item.path !== "/templates" && item.path !== "/settings"
+    )
+
 
   function handleLogout() {
     localStorage.removeItem("token");
