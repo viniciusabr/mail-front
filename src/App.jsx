@@ -30,7 +30,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Redirecionamento padrão baseado no usuário salvo */}
         <Route
@@ -135,6 +135,6 @@ createRoot(document.getElementById("root")).render(
       </Routes>
 
       <ToastContainer />
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 );
