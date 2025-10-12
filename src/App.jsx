@@ -125,7 +125,7 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
-        <Route path="/templates" element={<TemplateGenerator />} />
+        {/* <Route path="/templates" element={<TemplateGenerator />} /> */}
 
       </Routes>
 
