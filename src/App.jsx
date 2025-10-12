@@ -25,10 +25,12 @@ import TemplateGenerator from './pages/Templates/TemplateGeneratorPage';
 import PrivateRoute from "./routes/PrivateRoute";
 import PrivateRouteAdmin from "./routes/PrivateRouteAdm";
 import PainelAdmistrativo from './pages/PainelAdminstrativo/PainelAdmistrativo';
+import { BrowserRouter } from 'react-router-dom';
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <HashRouter>
+    <BrowserRouter>
       <Routes>
         {/* Redirecionamento padrão baseado no usuário salvo */}
         <Route
@@ -125,20 +127,14 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
-        {/* <Route path="/templates" element={<TemplateGenerator />} /> */}
+        {
+          import.meta.env.MODE === 'development' && (
+            <Route path="/templates" element={<TemplateGenerator />} />
+          )}
 
       </Routes>
 
       <ToastContainer />
-    </HashRouter>
+    </BrowserRouter>
   </StrictMode>
 );
-
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker
-//       .register("/sw.js")
-//       .then((reg) => console.log("[SW] registrado em:", reg.scope))
-//       .catch((err) => console.log("[SW] erro ao registrar:", err))
-//   })
-// }

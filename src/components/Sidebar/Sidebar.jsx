@@ -12,6 +12,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: "Configurações", icon: <Settings size={20} />, path: "/settings" },
   ];
 
+  const filteredMenu = import.meta.env.MODE === 'development'
+    ? menuItems
+    : menuItems.filter((item) => item.path !== "/templates" || "settings")
+
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -41,7 +45,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       {/* Menu */}
       <nav className="flex-1 mt-4 space-y-1">
-        {menuItems.map((item, index) => {
+        {filteredMenu.map((item, index) => {
           const active = location.pathname === item.path;
           return (
             <div
