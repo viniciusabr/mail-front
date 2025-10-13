@@ -1,7 +1,11 @@
 import axios from 'axios';
 import { toast } from "react-toastify";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL =
+  import.meta.env.MODE === 'development'
+    ? 'http://localhost:3000/'
+    : 'https://mail-pj9m.onrender.com/';
+
 
 const getToken = () => {
   const token = localStorage.getItem("token");
