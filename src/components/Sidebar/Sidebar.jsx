@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   return (
     <div
       className={`fixed top-0 left-0 h-screen 
-        ${isOpen ? "w-64" : "w-20"} 
+        ${isOpen ? "w-52  " : "w-16"} 
         bg-violet-950 text-white 
         transition-all duration-300 flex flex-col shadow-lg`}
     >
