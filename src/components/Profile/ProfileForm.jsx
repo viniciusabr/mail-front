@@ -1,14 +1,25 @@
 import { useState } from "react";
 
-function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
-  const [profileData, setProfileData] = useState({ name: user.name, email: user.email });
-  const [passwordData, setPasswordData] = useState({ oldPassword: "", newPassword: "" });
+function ProfileForm({ user, onUpdateProfile, onChangePassword, onChangePasswordApp }) {
+  const [profileData, setProfileData] = useState({
+    name: user.name,
+    email: user.email
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: ""
+  });
+
+  const [passwordApp, setPasswordApp] = useState({
+    appPassword: ""
+  });
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onUpdateProfile(profileData); // só manda name/email
+        onUpdateProfile(profileData);
       }}
       className="bg-white shadow-md rounded-lg p-6 w-[800px] mx-auto space-y-4 border border-orange-500"
     >
@@ -20,21 +31,26 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
         <input
           type="text"
           value={profileData.name}
-          onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+          onChange={(e) =>
+            setProfileData({ ...profileData, name: e.target.value })
+          }
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
       {/* Email */}
-      {/* <div>
+      <div>
         <label className="block text-gray-700 font-medium mb-1">Email:</label>
         <input
           type="email"
           value={profileData.email}
-          onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+          onChange={(e) =>
+            setProfileData({ ...profileData, email: e.target.value })
+          }
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          disabled
         />
-      </div> */}
+      </div>
 
       <button
         type="submit"
@@ -53,7 +69,9 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
         <input
           type="password"
           value={passwordData.oldPassword}
-          onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+          onChange={(e) =>
+            setPasswordData({ ...passwordData, oldPassword: e.target.value })
+          }
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
           placeholder="***********"
         />
@@ -64,7 +82,9 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
         <input
           type="password"
           value={passwordData.newPassword}
-          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+          onChange={(e) =>
+            setPasswordData({ ...passwordData, newPassword: e.target.value })
+          }
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
           placeholder="***********"
         />
@@ -72,10 +92,36 @@ function ProfileForm({ user, onUpdateProfile, onChangePassword }) {
 
       <button
         type="button"
-        onClick={() => onChangePassword(passwordData)} // só manda senha
+        onClick={() => onChangePassword(passwordData)}
         className="w-full bg-green-500 text-white font-semibold px-4 py-2 rounded-md hover:bg-green-600 transition"
       >
         Alterar Senha
+      </button>
+
+      <hr className="my-4 border-gray-300" />
+
+      {/* Senha do Aplicativo */}
+      <h3 className="text-xl font-semibold mb-2">Senha do Aplicativo (envio de e-mail)</h3>
+
+      <div>
+        <label className="block text-gray-700 font-medium mb-1">Senha do App:</label>
+        <input
+          type="password"
+          value={passwordApp.appPassword}
+          onChange={(e) =>
+            setPasswordApp({ ...passwordApp, appPassword: e.target.value })
+          }
+          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="***********"
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onChangePasswordApp(passwordApp)}
+        className="w-full bg-purple-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-purple-700 transition"
+      >
+        Atualizar Senha do Aplicativo
       </button>
     </form>
   );

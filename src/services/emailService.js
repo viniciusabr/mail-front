@@ -121,3 +121,23 @@ export const changePassword = async ({ oldPassword, newPassword }) => {
     throw new Error(message);
   }
 };
+
+// Alterar senha do aplicativo (senha para envio de email)
+export const changePasswordApp = async ({ appPassword }) => {
+const token = getToken();
+
+
+const response = await axios.put(
+`${BASE_URL}api/users/me/app-password`,
+{ appPassword },
+{ headers: { Authorization: `Bearer ${token}` } }
+);
+
+
+toast.success(response.data.message);
+return true;
+};
+
+
+
+

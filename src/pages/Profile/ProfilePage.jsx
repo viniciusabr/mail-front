@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ProfileForm from "../../components/Profile/ProfileForm";
-import { getProfile, updateProfile, changePassword } from "../../services/emailService";
+import { getProfile, updateProfile, changePassword, changePasswordApp } from "../../services/emailService";
 
 function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -38,6 +38,15 @@ function ProfilePage() {
     }
   };
 
+  // 🔥 ESTA É A FUNÇÃO NOVA
+  const handleChangePasswordApp = async (data) => {
+    try {
+      await changePasswordApp(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) return <p className="text-center mt-10">Carregando perfil...</p>;
   if (!user) return <p className="text-center mt-10 text-red-500">Usuário não encontrado</p>;
 
@@ -47,6 +56,9 @@ function ProfilePage() {
         user={user}
         onUpdateProfile={handleUpdateProfile}
         onChangePassword={handleChangePassword}
+
+        // 🔥 PASSA O CALLBACK NOVO AQUI
+        onChangePasswordApp={handleChangePasswordApp}
       />
     </div>
   );
