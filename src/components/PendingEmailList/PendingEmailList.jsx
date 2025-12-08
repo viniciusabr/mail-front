@@ -53,9 +53,17 @@ function PendingEmailList({ entries, onRemove }) {
           >
             <div className="space-y-1">
               <p><strong>Nome do cliente:</strong> {entry.nome}</p>
-              <p><strong>Número do caso:</strong> {entry.numeroCaso}</p>
+
+              <p>
+                <strong>Números do caso:</strong>{" "}
+                {Array.isArray(entry.numeroCaso)
+                  ? entry.numeroCaso.filter(Boolean).join(", ")
+                  : entry.numeroCaso || "—"}
+              </p>
+
               <p><strong>E-mail:</strong> {entry.destinatario}</p>
             </div>
+
             <button
               onClick={() => onRemove(entry.id)}
               className="text-red-600 font-bold hover:text-red-800 ml-4"
@@ -70,3 +78,5 @@ function PendingEmailList({ entries, onRemove }) {
 }
 
 export default PendingEmailList;
+
+
