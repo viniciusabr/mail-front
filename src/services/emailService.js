@@ -1,11 +1,5 @@
-import axios from 'axios';
+import api from './api';
 import { toast } from "react-toastify";
-
-const BASE_URL =
-  import.meta.env.MODE === 'development'
-    ? 'http://localhost:3000/'
-    : 'https://mail-pj9m.onrender.com/';
-
 
 const getToken = () => {
   const token = localStorage.getItem("token");
@@ -18,12 +12,12 @@ export const sendEmails = async (payload) => {
   const token = getToken();
 
   try {
-    await axios.post(`${BASE_URL}api/email/send`, payload, {
+    await api.post('/api/email/send', payload, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return true;
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Erro ao enviar';
+    const message = error.response?.data?.message || error.message;
     throw new Error(message);
   }
 };
@@ -31,9 +25,9 @@ export const sendEmails = async (payload) => {
 // Login
 export const login = async (payload) => {
   try {
-    return await axios.post(`${BASE_URL}api/auth/login`, payload);
+    return await api.post('/api/auth/login', payload);
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Erro ao enviar';
+    const message = error.response?.data?.message || error.message;
     toast.error(message);
     throw new Error(message);
   }
@@ -42,10 +36,10 @@ export const login = async (payload) => {
 // Registro
 export const register = async (payload) => {
   try {
-    const response = await axios.post(`${BASE_URL}api/auth/register`, payload);
-    return response.data;
+    const { data } = await api.post('/api/auth/register', payload);
+    return data;
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Erro ao enviar';
+    const message = error.response?.data?.message || error.message;
     toast.error(message);
     throw new Error(message);
   }
@@ -53,91 +47,58 @@ export const register = async (payload) => {
 
 // Obter usuários
 export const getUsers = async () => {
-  const response = await axios.get(`${BASE_URL}api/users`);
-  if (Array.isArray(response.data)) return response.data;
-  if (response.data && Array.isArray(response.data.users)) return response.data.users;
-  return [];
+  const { data } = await api.get('/api/users');
+  return data.users || data || [];
 };
 
-// Alternar status do usuário
+// Alternar status
 export const toggleUserStatus = async (id, currentStatus) => {
-  const newStatus = currentStatus === "ativo" ? "inativo" : "ativo";
-  const response = await axios.patch(`${BASE_URL}api/users/${id}/status`, { status: newStatus });
-  return response.data.user;
+  const status = currentStatus === "ativo" ? "inativo" : "ativo";
+  const { data } = await api.patch(`/api/users/${id}/status`, { status });
+  return data.user;
 };
 
-// Alternar admin do usuário
+// Admin
 export const updateUserAdmin = async (id, isAdmin) => {
-  const response = await axios.patch(`${BASE_URL}api/users/${id}/admin`, { isAdmin });
-  return response.data.user;
+  const { data } = await api.patch(`/api/users/${id}/admin`, { isAdmin });
+  return data.user;
 };
 
-//pega o perfil do usuário logado
+// Perfil
 export const getProfile = async () => {
-  const token = getToken(); // pega token do localStorage
-
-  try {
-    const response = await axios.get(`${BASE_URL}api/users/me`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    return response.data; // retorna objeto do usuário
-  } catch (error) {
-    const message = error.response?.data?.error || error.message || "Erro ao buscar perfil";
-    toast.error(message);
-    throw new Error(message);
-  }
+  const token = getToken();
+  const { data } = await api.get('/api/users/me', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return data;
 };
 
-export const updateProfile = async (data) => {
+// Atualizar perfil
+export const updateProfile = async (payload) => {
   const token = getToken();
-  try {
-    const response = await axios.put(`${BASE_URL}api/users/me`, data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success(response.data.message);
-    return response.data.user;
-  } catch (error) {
-    const message = error.response?.data?.error || error.message || "Erro ao atualizar perfil";
-    toast.error(message);
-    throw new Error(message);
-  }
+  const { data } = await api.put('/api/users/me', payload, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  toast.success(data.message);
+  return data.user;
 };
 
 // Alterar senha
-export const changePassword = async ({ oldPassword, newPassword }) => {
+export const changePassword = async (payload) => {
   const token = getToken();
-  try {
-    const response = await axios.put(
-      `${BASE_URL}api/users/me/password`,
-      { oldPassword, newPassword },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    toast.success(response.data.message);
-    return true;
-  } catch (error) {
-    const message = error.response?.data?.error || error.message || "Erro ao alterar senha";
-    toast.error(message);
-    throw new Error(message);
-  }
+  const { data } = await api.put('/api/users/me/password', payload, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  toast.success(data.message);
+  return true;
 };
 
-// Alterar senha do aplicativo (senha para envio de email)
+// Senha do app
 export const changePasswordApp = async ({ appPassword }) => {
-const token = getToken();
-
-
-const response = await axios.put(
-`${BASE_URL}api/users/me/app-password`,
-{ appPassword },
-{ headers: { Authorization: `Bearer ${token}` } }
-);
-
-
-toast.success(response.data.message);
-return true;
+  const token = getToken();
+  const { data } = await api.put('/api/users/me/app-password', { appPassword }, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  toast.success(data.message);
+  return true;
 };
-
-
-
-
